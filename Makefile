@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic
 
-SRCS = main.cpp GNSS.cpp lsh.cpp mrng.cpp utils.cpp hashing.cpp
+SRCS = main.cpp GNSS.cpp lshgraph.cpp mrng.cpp utils.cpp hashing.cpp
 OBJS = $(SRCS:.cpp=.o)
 TARGET = main
 

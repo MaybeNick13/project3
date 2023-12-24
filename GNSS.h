@@ -1,4 +1,4 @@
-#include "lsh.h"
+#include "lshgraph.h"
 
 #include "utils.h"
 

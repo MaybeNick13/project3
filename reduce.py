@@ -14,28 +14,36 @@ train_images, test_images = train_images.astype('float32') / 255.0, test_images.
 train_images, valid_images = train_test_split(train_images, test_size=0.07, random_state=42)
 
 # Define the autoencoder model with batch normalization and leaky relu
-def build_autoencoder(latent_dim=10):  # Pass the desired latent dimension as an argument
-    input_img = tf.keras.Input(shape=(28, 28))
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+def build_autoencoder():
+    input_img = tf.keras.Input(shape=(28, 28, 1))
 
     # Encoder
-    x = layers.Reshape((28, 28, 1))(input_img)
-    x = layers.Conv2D(16, (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.5), padding='same')(x)
+    x = layers.Conv2D(32, (3, 3), activation=layers.LeakyReLU(alpha=0.5), padding='same')(input_img)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
-    x = layers.Conv2D(8, (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.5), padding='same')(x)
+    x = layers.Conv2D(64, (3, 3), activation=layers.LeakyReLU(alpha=0.5), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
-    x = layers.Conv2D(8, (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.5), padding='same')(x)
-    encoded = layers.MaxPooling2D((2, 2), padding='same')(x)
+    x = layers.Flatten()(x)
+    encoded = layers.Dense(10, activation=layers.LeakyReLU(alpha=0.5))(x)
 
-    flat = layers.Flatten()(encoded) 
     # Decoder
-    x = layers.Reshape((4, 4, 8))(flat)  
-    x = layers.Conv2D(8, (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.5), padding='same')(x)
+    x = layers.Dense(3136, activation=layers.LeakyReLU(alpha=0.5))(encoded)
+    x = layers.Reshape((7, 7, 64))(x)
+    x = layers.Conv2D(64, (3, 3), activation=layers.LeakyReLU(alpha=0.5), padding='same')(x)
+    x = layers.BatchNormalization()(x)
     x = layers.UpSampling2D((2, 2))(x)
-    x = layers.Conv2D(8, (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.5), padding='same')(x)
-    x = layers.UpSampling2D((2, 2))(x)
-    x = layers.Conv2D(16, (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.5))(x)
+    x = layers.Conv2D(32, (3, 3), activation=layers.LeakyReLU(alpha=0.5), padding='same')(x)
+    x = layers.BatchNormalization()(x)
     x = layers.UpSampling2D((2, 2))(x)
     decoded = layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
 
@@ -44,12 +52,19 @@ def build_autoencoder(latent_dim=10):  # Pass the desired latent dimension as an
 
     return autoencoder
 
-autoencoder = build_autoencoder(latent_dim=10)  # Set the latent dimension to 10
+# Create the autoencoder model
+autoencoder = build_autoencoder()
+autoencoder.summary()
+
+
+
+
+autoencoder = build_autoencoder()  
 autoencoder.summary()
 
 history = autoencoder.fit(
     train_images, train_images,
-    epochs=20,
+    epochs=10,
     batch_size=16,
     shuffle=True,
     validation_data=(valid_images, valid_images)

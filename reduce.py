@@ -23,34 +23,44 @@ from tensorflow.keras import layers, models
 import tensorflow as tf
 from tensorflow.keras import layers, models
 
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
 def build_autoencoder():
     input_img = tf.keras.Input(shape=(28, 28, 1))
 
     # Encoder
-    x = layers.Conv2D(32, (3, 3), activation=layers.LeakyReLU(alpha=0.5), padding='same')(input_img)
+    x = layers.Conv2D(16, (3, 3), activation=layers.LeakyReLU(alpha=0.2), padding='same')(input_img)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
-    x = layers.Conv2D(64, (3, 3), activation=layers.LeakyReLU(alpha=0.5), padding='same')(x)
+    x = layers.Conv2D(8, (3, 3), activation=layers.LeakyReLU(alpha=0.2), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
     x = layers.Flatten()(x)
-    encoded = layers.Dense(10, activation=layers.LeakyReLU(alpha=0.5))(x)
+    encoded = layers.Dense(10, activation=layers.LeakyReLU(alpha=0.2))(x)
 
     # Decoder
-    x = layers.Dense(3136, activation=layers.LeakyReLU(alpha=0.5))(encoded)
-    x = layers.Reshape((7, 7, 64))(x)
-    x = layers.Conv2D(64, (3, 3), activation=layers.LeakyReLU(alpha=0.5), padding='same')(x)
+    x = layers.Dense(392, activation=layers.LeakyReLU(alpha=0.2))(encoded)
+    x = layers.Reshape((7, 7, 8))(x)
+    x = layers.Conv2D(8, (3, 3), activation=layers.LeakyReLU(alpha=0.2), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.UpSampling2D((2, 2))(x)
-    x = layers.Conv2D(32, (3, 3), activation=layers.LeakyReLU(alpha=0.5), padding='same')(x)
+    x = layers.Conv2D(16, (3, 3), activation=layers.LeakyReLU(alpha=0.2), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.UpSampling2D((2, 2))(x)
     decoded = layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
 
     autoencoder = models.Model(input_img, decoded)
-    autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+    autoencoder.compile(optimizer='adam', loss='mean_squared_error')
 
     return autoencoder
+
+
+
+
 
 # Create the autoencoder model
 autoencoder = build_autoencoder()

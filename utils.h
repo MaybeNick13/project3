@@ -43,7 +43,7 @@ public:
     myMap();
     void insert(int key, int value);
     std::list<int> get(int key);
-    void display();
+    void create_logfile();
 };
 class myfMap {
 private:

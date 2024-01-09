@@ -3,22 +3,25 @@
 
 hashfunc::hashfunc() {}
 
-hashfunc::hashfunc(Node* nodes) {
+hashfunc::hashfunc(Node* nodes) {   
+    // random uniformly distributed number generator
     random_device rd{};
     mt19937 gen{rd()};
     normal_distribution<float> myRand(0.5, 0.25);
 
+
     proj.resize(ImageSize);
     float length = 0;
     for (int i = 0; i < ImageSize; i++) {
-        proj[i] = myRand(gen); // vector initialization
+        // getting the projection vector
+        proj[i] = myRand(gen); 
         length += proj[i] * proj[i];
     }
     length = sqrt(length);
 
     for (int i = 0; i < ImageSize; i++) {
 
-        proj[i] = proj[i] / length; // kanonikopoihsh
+        proj[i] = proj[i] / length; // regularization
     }
 
     uniform_real_distribution<float> myRealRand(0.0, W - 0.00000001);
@@ -27,12 +30,20 @@ hashfunc::hashfunc(Node* nodes) {
     hashvalues = vector<int>(NumImages);
 
     for (int i = 0; i < NumImages; i++) {
+        if(i == 41358)
+            cout << "For debug only" << endl;
         float innerprod = 0;
         for (int j = 0; j < ImageSize; j++) {
-            innerprod += proj[j] * (float)(static_cast<unsigned char>(nodes[i].image[j]));
+            innerprod += proj[j] * (float)((unsigned char)(nodes[i].image[j]));
         }
 
+
         hashvalues[i] = (innerprod + t) / W;
+        if(innerprod > 2000){
+            cout << i << "is over 2000!" << endl;
+        }
+
+        // POSSIBLE FAULT HERE, SHOULD DEBUG TO BE SURE
     }
 }
 
@@ -59,17 +70,20 @@ vector<int> hashfunc::get_values() {
 hashtable::hashtable() {}
 
 hashtable::hashtable(int num, Node** im) : images(im), id_num(num) {
+    // vector for storing hvalues of hashtables
     vector<vector<int>> hval(k);
     int factors[k];
     srand((unsigned)time(NULL));
     int random = rand();
-    int ID [NumImages];
+    unsigned int ID [NumImages];
     int gHash [NumImages];
 
     for (int i = 0; i < k; i++) {                   //ftiaxnei k hashfuncs kai apothikevi tis times tous
         hashfunc val(*images);
+        // returns projections of all vectors in a random line
         hval[i] = val.get_values();
-        factors[i] = rand() % 9999999+11;
+        // random number to multiply the hvals
+        factors[i] = rand();
         hashfuncs.push_back(val);
     }
 
@@ -82,11 +96,15 @@ hashtable::hashtable(int num, Node** im) : images(im), id_num(num) {
             ID[i] +=factors[j] *hval[j][i];
         }
         ID[i] = ID[i] % M;
+        if(i == 41358)
+            cout << "ID = " << ID[i] << endl;
         (*images)[i].IDS[id_num] = ID[i];
     }
 
     for (int i = 0; i < NumImages; i++) {
         gHash[i] = ID[i] % (NumImages / 4);
+        if(i == 41358)
+            cout << "ghash = " << gHash[i] << endl;
         map.insert(gHash[i], i);
     }
 }

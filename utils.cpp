@@ -3,7 +3,9 @@
 #include <list>
 #include <iostream>
 #include <cmath>
+#include <fstream>
 #include <queue>
+
 
 using namespace std;
 
@@ -41,13 +43,13 @@ list<int> myMap::get(int key) {
     return values;
 }
 
-void myMap::display() {
-    for (int i = 0; i < 100; i++) {
-        std::cout << "Bucket " << i << ": ";
+void myMap::create_logfile() {
+    for (int i = 0; i < NumImages / 4; i++) {
+        cout << "Bucket " << i << ": ";
         for (const myPair& myPair : table[i]) {
-            std::cout << "(" << myPair.key << ", " << myPair.pos << ") ";
+            cout << "(" << myPair.key << ", " << myPair.pos << ") ";
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 }
 

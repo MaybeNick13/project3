@@ -20,6 +20,9 @@ extern int R;
 extern int NumImages;
 extern int ImageSize;
 extern unsigned long M;
+extern int ck;
+extern int cM;
+extern int cProbes; 
 struct kmean_node{
 	int pos;
 	float key;

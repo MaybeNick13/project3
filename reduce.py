@@ -1,3 +1,5 @@
+import struct
+
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from sklearn.model_selection import train_test_split
@@ -14,21 +16,6 @@ train_images, test_images = train_images.astype('float32') / 255.0, test_images.
 train_images, valid_images = train_test_split(train_images, test_size=0.07, random_state=42)
 
 # Define the autoencoder model with batch normalization and leaky relu
-import tensorflow as tf
-from tensorflow.keras import layers, models
-
-import tensorflow as tf
-from tensorflow.keras import layers, models
-
-import tensorflow as tf
-from tensorflow.keras import layers, models
-
-import tensorflow as tf
-from tensorflow.keras import layers, models
-
-import tensorflow as tf
-from tensorflow.keras import layers, models
-
 def build_autoencoder():
     input_img = tf.keras.Input(shape=(28, 28, 1))
 
@@ -58,31 +45,66 @@ def build_autoencoder():
 
     return autoencoder
 
-
-
-
-
 # Create the autoencoder model
 autoencoder = build_autoencoder()
 autoencoder.summary()
 
-
-
-
-autoencoder = build_autoencoder()  
-autoencoder.summary()
-
+# Train the autoencoder
 history = autoencoder.fit(
     train_images, train_images,
     epochs=10,
-    batch_size=16,
+    batch_size=32,
     shuffle=True,
     validation_data=(valid_images, valid_images)
 )
 
-autoencoder.evaluate(test_images, test_images)
+# Create a new model to get the encoded features
+encoder_model = models.Model(inputs=autoencoder.input, outputs=autoencoder.layers[8].output)
 
-encoded_imgs = autoencoder.predict(test_images)
+# Save encoded images of the training set
+encoded_train_imgs = encoder_model.predict(train_images)
+
+# Save encoded images of the test set
+encoded_test_imgs = encoder_model.predict(test_images)
+
+# Define file paths
+train_file_path = 'encoded_train_images.dat'
+test_file_path = 'encoded_test_images.dat'
+
+# Function to save encoded images to a file
+def save_encoded_images(file_path, encoded_imgs):
+    with open(file_path, 'wb') as file:
+        # Write magic number (random 32-bit integer)
+        magic_number = np.random.randint(0, 2**31 - 1)
+        file.write(struct.pack('>I', magic_number))
+
+        # Write number of images (32-bit integer)
+        num_images = len(encoded_imgs)
+        file.write(struct.pack('>I', num_images))
+
+        # Write latent dimension (32-bit integer)
+        latent_dimension = 10
+        file.write(struct.pack('>I', latent_dimension))
+
+        # Write number of columns (32-bit integer)
+        num_columns = 1
+        file.write(struct.pack('>I', num_columns))
+
+        # Iterate through each image
+        for img_idx in range(num_images):
+            # Write pixel values (unsigned byte)
+            for pixel_value in encoded_imgs[img_idx].flatten():
+                file.write(struct.pack('B', max(0, min(int(pixel_value * 255), 255))))
+
+# Save encoded images of the training set
+save_encoded_images(train_file_path, encoded_train_imgs)
+
+# Save encoded images of the test set
+save_encoded_images(test_file_path, encoded_test_imgs)
+
+# Print confirmation messages
+print(f"Encoded training images saved to {train_file_path}")
+print(f"Encoded test images saved to {test_file_path}")
 
 # Plot the training and validation loss
 plt.plot(history.history['loss'], label='Training Loss')
@@ -91,23 +113,4 @@ plt.title('Training and Validation Loss')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend()
-plt.show()
-
-# Plot the original and reconstructed images
-n = 10
-plt.figure(figsize=(20, 4))
-for i in range(n):
-    # Display original images
-    ax = plt.subplot(2, n, i + 1)
-    plt.imshow(test_images[i].reshape(28, 28))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-
-    # Display reconstructed images
-    ax = plt.subplot(2, n, i + 1 + n)
-    plt.imshow(encoded_imgs[i].reshape(28, 28))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
 plt.show()

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic
+CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic -g
 
 SRCS = main.cpp GNSS.cpp lshgraph.cpp mrng.cpp utils.cpp hashing.cpp
 OBJS = $(SRCS:.cpp=.o)
@@ -8,8 +8,11 @@ TARGET = main
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
 
-%.o: %.cpp
+lsh: lsh.o utils.o hashing.o hashing.h utils.h
+	$(CXX) $(CXXFLAGS) lsh.o utils.o hashing.o -o lsh
+
+%.o: %.cpp 
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) lsh.o lsh

@@ -91,7 +91,7 @@ int main(int argc, char * argv[]) {
     ImageSize = rows * columns;
     bool repeat;
     // creating array for storing the data
-    Node * array = new Node[NumImages];
+    Node * array = new Node[NumImages + 1];
     // data structures for keeping the results and comparing
     pair_dist_pos * methodResult = new pair_dist_pos[N];
     pair_dist_pos * exhaustiveResult = new pair_dist_pos[N];
@@ -128,40 +128,40 @@ int main(int argc, char * argv[]) {
             query.read(queries[i].image.data(), ImageSize);
         }
         // creation of hashtables
-        hashtable tables[L];
+        hashtable* tables[L];
         for (int j = 0; j < L; j++) {
-            tables[j] = hashtable(j, & array); //initialization of hashtables
+            tables[j] = new hashtable(j, & array); //initialization of hashtables
         }
 
         for (int i = 0; i < queryImages; i++) {
 
             auto startMethod = chrono::high_resolution_clock::now();
             pair_dist_pos furthest;
-            int query_pos = NumImages - 1;
+            int query_pos = NumImages ;
             array[query_pos].image = queries[i].image;
             set < int > same_ids; ///gia pithanoun gitones
             priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > nn_pqueue;
             list < int > candidates;
             set < int > rNeighbors;
             for (int j = 0; j < L; j++) {
-                tables[j].hash( & array[query_pos]);
-                int query_id = array[query_pos].IDS[j];
+                tables[j]->hash( & queries[i]);
+                int query_id = queries[i].IDS[j];
 
                 int bucket_num = query_id % (NumImages / 4);
 
-                candidates = tables[j].get_bucket(bucket_num); //ikones sto idio bucket
+                candidates = tables[j]->get_bucket(bucket_num); //ikones sto idio bucket
 
                 for (auto itr: candidates) {
-                if (array[itr].IDS[j] == query_id) { //idio ID
-                    same_ids.insert(itr);
-                }
+                    if (array[itr].IDS[j] == query_id) { //idio ID
+                        same_ids.insert(itr);
+                    }
                 }
 
             }
             int f = 0;
             for (auto itr: same_ids) {
 
-                float dist = euclidean_distance(array[itr], array[query_pos]); //diasxizoume ton pinaka me ta same_ids
+                float dist = euclidean_distance(array[itr], queries[i]); //diasxizoume ton pinaka me ta same_ids
                 pair_dist_pos current {
                 dist,
                 itr
@@ -182,11 +182,11 @@ int main(int argc, char * argv[]) {
             chrono::duration < double > durationMethod = endMethod - startMethod;
             // R RANGE SEARCH
             for (int j = 0; j < L; j++) {
-                tables[j].hash( & array[query_pos]);
-                int query_id = array[query_pos].IDS[j];
+                tables[j]->hash( & queries[i]);
+                int query_id = queries[i].IDS[j];
 
                 int bucket_num = query_id % (NumImages / 4);
-                candidates = tables[j].get_bucket(bucket_num);
+                candidates = tables[j]->get_bucket(bucket_num);
 
                 for (auto itr: candidates) {
                 if (euclidean_distance(array[itr], queries[i]) < R) {

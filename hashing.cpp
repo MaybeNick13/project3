@@ -50,8 +50,11 @@ hashfunc::hashfunc(Node* nodes) {
 float hashfunc::hash(Node node) {        //function gia to hashing to query meta tin arxikopiisi olou tou table
     float innerprod = 0;
     for (int j = 0; j < ImageSize; j++) {
-        innerprod += proj[j] * (float)(static_cast<unsigned char>(node.image[j]));
+        innerprod += proj[j] * (float)((unsigned char)(node.image[j]));
+        cout << "j = " << proj[j] <<", char value = " << (float)((unsigned char)(node.image[j])) << ", innerprod = " << innerprod << endl;
     }
+    cout << "Got into function, for some reason cant debug here, INERPROD = " << innerprod << endl;
+
     return ((innerprod + t) / W);
 }
 
@@ -77,14 +80,14 @@ hashtable::hashtable(int num, Node** im) : images(im), id_num(num) {
     int random = rand();
     unsigned int ID [NumImages];
     int gHash [NumImages];
+    hashfuncs = new hashfunc*[k];
 
     for (int i = 0; i < k; i++) {                   //ftiaxnei k hashfuncs kai apothikevi tis times tous
-        hashfunc val(*images);
+        hashfuncs[i] = new hashfunc(*images);
         // returns projections of all vectors in a random line
-        hval[i] = val.get_values();
+        hval[i] = hashfuncs[i]->get_values();
         // random number to multiply the hvals
         factors[i] = rand();
-        hashfuncs.push_back(val);
     }
 
     for (int i = 0; i < NumImages; i++) {
@@ -113,7 +116,7 @@ void hashtable::hash(Node* im) {
     vector<int> hval(k);
     int ID = 0;
     for (int i = 0; i < k; i++) {
-        ID += hashfuncs[i].hash(*im);
+        ID += hashfuncs[i]->hash(*im);
     }
     ID = ID % M;
     im->IDS[id_num] = ID;
@@ -123,7 +126,7 @@ void hashtable::hash(vector<float> centroid, vector<int> *IDS){
     vector<int> hval(k);
     int ID = 0;
     for (int i = 0; i < k; i++) {
-        ID += hashfuncs[i].hash(centroid);
+        ID += hashfuncs[i]->hash(centroid);
     }
     ID = ID % M;
     (*IDS)[id_num] = ID;

@@ -86,7 +86,7 @@ void myfMap::display() {
 
 Node::Node() {
     image = vector<char>(ImageSize);
-    IDS = vector<int>(L, -1);
+    IDS = vector<unsigned int>(L, -1);
 }
 
 

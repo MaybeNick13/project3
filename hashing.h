@@ -34,7 +34,7 @@ private:
     Node** images;
     int id_num;
     myMap map;
-    std::vector<hashfunc> hashfuncs;
+    hashfunc ** hashfuncs;
     int* factors;
 
 public:

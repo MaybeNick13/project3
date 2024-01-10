@@ -59,7 +59,7 @@ public:
 class Node {
 public:
     std::vector<char> image;
-    std::vector<int> IDS;
+    std::vector<unsigned int> IDS;
     Node();
 };
 

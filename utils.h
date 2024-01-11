@@ -30,7 +30,7 @@ struct kmean_node{
 };
 
 struct myPair {
-    int key;
+    unsigned int key;
     int pos;
 };
 
@@ -95,6 +95,7 @@ bool check_if_option_exists(char** begin, char** end, const string& option);
 int get_num_from_line(string line, int del_pos);
 
 
+priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(Node* array, Node query, int Num);
 priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(Node* array, Node query);
 
 class MRNG_Node{

@@ -40,9 +40,12 @@ private:
 public:
     hashtable();
     hashtable(int num, Node** im);
+    ~hashtable();
     void hash(Node* im);
     void hash(vector<float> centroid, vector<int> *IDS);
     void print_table();
+
+
     std::list<int> get_bucket(unsigned int bucket_num);
 };
 

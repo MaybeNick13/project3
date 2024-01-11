@@ -5,7 +5,7 @@ SRCS = main.cpp GNSS.cpp lshgraph.cpp mrng.cpp utils.cpp hashing.cpp
 OBJS = $(SRCS:.cpp=.o)
 TARGET = main
 
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJS) hashing.h utils.h
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
 
 lsh: lsh.o utils.o hashing.o hashing.h utils.h

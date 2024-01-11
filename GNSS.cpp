@@ -57,6 +57,7 @@ int gnss(int argc, char * argv[]) {
     (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
 
   ImageSize = rows * columns;
+  TableSize = NumImages / 4;
   Node * array = new Node[NumImages+1];
 
   for (int i = 0; i < NumImages; i++) {
@@ -121,7 +122,7 @@ int gnss(int argc, char * argv[]) {
         chrono::duration < double > durationMethod = endMethod - startMethod;  
         totalMethodDuration+= durationMethod.count();
         auto startExhaustive = chrono::high_resolution_clock::now();
-         priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, NumImages);
+         priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, queries[i], GraphN);
         auto endExhaustive = chrono::high_resolution_clock::now();
         chrono::duration < double > durationExhaustive = endExhaustive - startExhaustive;
         totalExhaustiveDuration+=durationExhaustive.count();

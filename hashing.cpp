@@ -127,6 +127,16 @@ void hashtable::hash(vector<float> centroid, vector<int> *IDS){
     (*IDS)[id_num] = ID;
 }
 
+hashtable :: ~hashtable(){
+    delete[] (*factors);
+    delete[] factors;
+    for(int i = 0; i < k; i++){
+        delete hashfuncs[i];
+    }
+    delete[] hashfuncs;
+    
+}
+
 void hashtable::print_table(){
     map.create_logfile();
 }

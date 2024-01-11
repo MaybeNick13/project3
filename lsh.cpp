@@ -189,9 +189,9 @@ int main(int argc, char * argv[]) {
                 candidates = tables[j]->get_bucket(bucket_num);
 
                 for (auto itr: candidates) {
-                if (euclidean_distance(array[itr], queries[i]) < R) {
-                    rNeighbors.insert(itr);
-                }
+                    if (euclidean_distance(array[itr], queries[i]) < R) {
+                        rNeighbors.insert(itr);
+                    }
                 }
 
             }
@@ -230,6 +230,9 @@ int main(int argc, char * argv[]) {
         cin >> answer;
         repeat = true;
         queryF = answer;
+        }
+        for(int t = 0; t < L; t++){
+            delete tables[t];
         }
     } while (repeat == 1);
     delete[] array;

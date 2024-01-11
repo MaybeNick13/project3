@@ -185,9 +185,9 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
 int mrng(int argc, char * argv[]){
     int N_mrng = 15;
     int l_mrng = 15; 
-    char* input_name, *query_name, *output_name;
+    char* input_name, *query_name, *output_name, *queryB_name, *inputB_name;
     int dimensions, num_of_images;
-    ifstream in_str, q_str;
+    ifstream in_str, q_str,inB_str,qB,str;
     ofstream out_str;
 
     input_name = get_str_of_option(argv, argv + argc, "-d");
@@ -216,7 +216,22 @@ int mrng(int argc, char * argv[]){
 		cout << "Please provide output file name next time, the program will now terminate" << endl;
 		exit(-2);
 	}
+    inputB_name = get_str_of_option(argv, argv + argc, "-ib");
+    if(inputB_name)
+		inB_str = ifstream(inputB_name);
+	else{
+		cout << "Please provide input file next time, the program will now terminate" << endl;
+		exit(-1);
+	}
 
+    queryB_name = get_str_of_option(argv, argv + argc, "-qb");
+    if(queryB_name)
+		qB_str = ifstream(queryB_name);
+	else{
+		cout << "Please provide query file next time, the program will now terminate" << endl;
+		exit(-1);
+	}
+    
     if (!in_str.is_open()) {
 		cerr << "Failed to open input file" << endl;
         cout << "File name:" << input_name << endl;
@@ -261,9 +276,10 @@ int mrng(int argc, char * argv[]){
     ImageSize = dimensions;
     
     MRNG_Node * array = new MRNG_Node[num_of_images]; //DONT FORGET TO DELETE
-
+    Node* arrayB= new Node [num_of_images];
 	for (int i = 0; i < num_of_images - 1; i++) {
 		in_str.read((char*)(array[i].image.data()), dimensions);
+        inB_str.read(arrayB[i].image.data(), 784);
 	}
     auto constructGraph = chrono::high_resolution_clock::now();
     search_graph_MRNG graph(l_mrng, N_mrng, dimensions, num_of_images, &array);
@@ -277,7 +293,7 @@ int mrng(int argc, char * argv[]){
     bool repeat = false;
 
     do{
-        double maf=-1;
+        double maf=0;
         repeat = false;
         q_str.seekg(4);
         char q_buffer[4];
@@ -298,7 +314,7 @@ int mrng(int argc, char * argv[]){
         (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
         (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
         (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
-
+        qB_str.seekg(16);
         q_dimen = q_rows * q_columns;
         if(q_dimen != dimensions){
             cout << "Query dimensions not same as input data dimensions, program will now terminate" << endl;
@@ -306,18 +322,22 @@ int mrng(int argc, char * argv[]){
         }
 
         MRNG_Node * queries = new MRNG_Node[num_of_queries];
-
+        Node * queriesB=new Node [num_of_queries];
         for (int i = 0; i < num_of_queries - 1; i++) {
-            in_str.read((char*)(queries[i].image.data()), dimensions);
+            q_str.read((char*)(queries[i].image.data()), dimensions);
+            qB_str.read(queriesB[i].image.data(), 784);
+
         }
 
         out_str << "MRNG results" << endl;
         double avg_exhaustive_time = 0, avg_SearchOnGraph_time = 0;
         num_of_queries = 10;
         for(int q = 0; q < num_of_queries; q++){
+            ImageSize=784;
             auto exhaustiveSearchStart = chrono::high_resolution_clock::now();
-            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, queries[q], N_mrng, num_of_images);
+            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(arrayB, queriesB[q], N_mrng, num_of_images);
             auto exhaustiveSearchEnd = chrono::high_resolution_clock::now();
+            ImageSize=dimensions;
             chrono::duration <double> exhaustiveTime = exhaustiveSearchEnd - exhaustiveSearchStart;
             avg_exhaustive_time += exhaustiveTime.count();
             

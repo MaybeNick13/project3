@@ -35,14 +35,15 @@ private:
     int id_num;
     myMap map;
     hashfunc ** hashfuncs;
-    int* factors;
+    int** factors;
 
 public:
     hashtable();
     hashtable(int num, Node** im);
     void hash(Node* im);
     void hash(vector<float> centroid, vector<int> *IDS);
-    std::list<int> get_bucket(int bucket_num);
+    void print_table();
+    std::list<int> get_bucket(unsigned int bucket_num);
 };
 
 #endif

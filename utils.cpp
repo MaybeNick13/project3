@@ -9,15 +9,16 @@
 
 using namespace std;
 
- int W=150;
- int k = 4;
- int L = 5;
+ int W = 6;
+ int k = 8;
+ int L = 10;
  int N = 50;
  int E=40;
  int R = 4;
- int GraphN = 5;
+ int GraphN = 50;
  int NumImages;
  int ImageSize =784;
+ int TableSize;
  unsigned long M= 4294967291;
  int ck=14;
  int cM=10;
@@ -25,15 +26,15 @@ using namespace std;
 // Implementation of myMap
 
 myMap::myMap() {
-    table.resize(NumImages / 4);
+    table.resize(TableSize);
 }
 
-void myMap::insert(int key, int value) {
+void myMap::insert(unsigned int key, int value) {
     struct myPair currPair = {key, value};
     table[key].push_back(currPair);
 }
 
-list<int> myMap::get(int key) {
+list<int> myMap::get(unsigned int key) {
     list<int> values;
     for (const auto& currPair : table[key]) {
         if (currPair.key == key) {
@@ -44,17 +45,18 @@ list<int> myMap::get(int key) {
 }
 
 void myMap::create_logfile() {
-    for (int i = 0; i < NumImages / 4; i++) {
-        cout << "Bucket " << i << ": ";
-        for (const myPair& myPair : table[i]) {
-            cout << "(" << myPair.key << ", " << myPair.pos << ") ";
-        }
-        cout << endl;
+    ofstream lgfile("logfile.txt");
+    int total = 0;
+    for (int i = 0; i < TableSize; i++) {
+        if(table[i].size() > 0)
+            lgfile << "Bucket " << i << " size:\t" << table[i].size() << endl;
+        total += table[i].size();
     }
+    lgfile << "Total number of points in table is " << total << endl;
 }
 
 myfMap::myfMap() {
-    table.resize(NumImages / 4);
+    table.resize(TableSize);
 }
 
 void myfMap::insert(unsigned long key, int value) {
@@ -166,14 +168,15 @@ bool compare::operator()(const pair_dist_pos &a, const pair_dist_pos &b) {
     return a.distance <= b.distance;
 }
 
-    priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(Node* array, int query_pos){
+priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(Node* array, Node query){
     priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > distances;
     pair_dist_pos furthest;
     for (int j = 0; j < NumImages; j++) {
-        if(j == query_pos)
+        float dist = euclidean_distance(array[j], query);
+        if(dist == 0)
             continue;
         pair_dist_pos pair = {
-            euclidean_distance(array[j], array[query_pos]),
+            dist,
             j
         }; //xrisimopoioume to struct myPair, afti ti fora dinontas sti thesi tou key tin apostasi, gia kaliteri xrisi xorou
         if (j < GraphN) {

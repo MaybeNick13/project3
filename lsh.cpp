@@ -60,6 +60,7 @@ int main(int argc, char * argv[]) {
     ofstream outfile;
     outfile.open(output);
 
+
     //opening input file
     ifstream images(input);
     if (!images.is_open()) {
@@ -88,6 +89,7 @@ int main(int argc, char * argv[]) {
         (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
 
     // getting dimensions from data of file
+    TableSize = NumImages / 4;
     ImageSize = rows * columns;
     bool repeat;
     // creating array for storing the data
@@ -145,36 +147,34 @@ int main(int argc, char * argv[]) {
             set < int > rNeighbors;
             for (int j = 0; j < L; j++) {
                 tables[j]->hash( & queries[i]);
-                int query_id = queries[i].IDS[j];
+                unsigned int query_id = queries[i].IDS[j];
 
-                int bucket_num = query_id % (NumImages / 4);
+                unsigned int bucket_num = query_id % (TableSize);
 
                 candidates = tables[j]->get_bucket(bucket_num); //ikones sto idio bucket
 
                 for (auto itr: candidates) {
-                    if (array[itr].IDS[j] == query_id) { //idio ID
-                        same_ids.insert(itr);
-                    }
+                    same_ids.insert(itr);
                 }
 
             }
+            cout << "Found " << same_ids.size() << " candidates for query" << endl;
             int f = 0;
             for (auto itr: same_ids) {
-
                 float dist = euclidean_distance(array[itr], queries[i]); //diasxizoume ton pinaka me ta same_ids
                 pair_dist_pos current {
-                dist,
-                itr
+                    dist,
+                    itr
                 };
 
                 if (f < N) { //an den exoume vrei N stoixeia akoma, aplos vale to mesa
-                nn_pqueue.push(current);
+                    nn_pqueue.push(current);
                 } else {
-                furthest = nn_pqueue.top();
-                if (current.distance < furthest.distance) {
-                    nn_pqueue.pop();
-                    nn_pqueue.emplace(current);
-                }
+                    furthest = nn_pqueue.top();
+                    if (current.distance < furthest.distance) {
+                        nn_pqueue.pop();
+                        nn_pqueue.emplace(current);
+                    }
                 }
                 f++;
             }
@@ -183,9 +183,9 @@ int main(int argc, char * argv[]) {
             // R RANGE SEARCH
             for (int j = 0; j < L; j++) {
                 tables[j]->hash( & queries[i]);
-                int query_id = queries[i].IDS[j];
+                unsigned int query_id = queries[i].IDS[j];
 
-                int bucket_num = query_id % (NumImages / 4);
+                unsigned int bucket_num = query_id % (TableSize);
                 candidates = tables[j]->get_bucket(bucket_num);
 
                 for (auto itr: candidates) {
@@ -198,7 +198,7 @@ int main(int argc, char * argv[]) {
             // R RANGE SEARCH
             priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > distances;
             auto startExhaustive = chrono::high_resolution_clock::now();
-            distances = calculateDistances(array, query_pos);
+            distances = calculateDistances(array, queries[i]);
             auto endExhaustive = chrono::high_resolution_clock::now();
             chrono::duration < double > durationExhaustive = endExhaustive - startExhaustive;
             for (int j = N - 1; j >= 0; j--) {

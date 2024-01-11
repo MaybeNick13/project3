@@ -19,6 +19,7 @@ extern int GraphN;
 extern int R;
 extern int NumImages;
 extern int ImageSize;
+extern int TableSize;
 extern unsigned long M;
 extern int ck;
 extern int cM;
@@ -44,8 +45,8 @@ private:
 
 public:
     myMap();
-    void insert(int key, int value);
-    std::list<int> get(int key);
+    void insert(unsigned int key, int value);
+    std::list<int> get(unsigned int key);
     void create_logfile();
 };
 class myfMap {
@@ -94,7 +95,7 @@ bool check_if_option_exists(char** begin, char** end, const string& option);
 int get_num_from_line(string line, int del_pos);
 
 
-priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(Node* array, int query_pos);
+priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(Node* array, Node query);
 
 class MRNG_Node{
     public:

@@ -81,7 +81,7 @@ int gnss(int argc, char * argv[]) {
         images.read(array[i].image.data(), ImageSize);
         imagesB.read(arrayB[i].image.data(), 784);
         for(int j = 0; j < ImageSize; j++){
-            testfile << setw(3) << static_cast<unsigned>(array[i].image[j]) << "\t";
+            testfile << setw(3) << +array[i].image[j] << "\t";
         }
         testfile << endl;
     }

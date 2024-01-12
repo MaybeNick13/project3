@@ -7,7 +7,7 @@ hashfunc::hashfunc(Node* nodes) {
     // random uniformly distributed number generator
     random_device rd{};
     mt19937 gen{rd()};
-    normal_distribution<float> myRand(0.0, 10.0);
+    normal_distribution<float> myRand(0.0, 1.0);
 
 
     proj.resize(ImageSize);

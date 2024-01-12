@@ -3,11 +3,9 @@ using namespace std;
 
 int gnss(int argc, char * argv[]) {
   srand((unsigned)time(NULL));
-  string input = "encoded_train_images.dat";
-  string queryF = "encoded_test_images.dat";
+  string input = "input.dat";
+  string queryF = "query.dat";
   string output = "graphRes.txt";
-  string inputB="input.dat";
-  string queryB="query.dat";
   for (int i = 1; i < argc; i++) { //parsing gia ta input variables
     if (strcmp(argv[i], "-o") == 0) {
       output = argv[i + 1];
@@ -30,16 +28,9 @@ int gnss(int argc, char * argv[]) {
     if (strcmp(argv[i], "-R") == 0) {
       R = std::stoi(argv[i + 1]);
     }
-    if (strcmp(argv[i], "-qB") == 0) {
-      queryB = argv[i + 1];
-    }
-    if (strcmp(argv[i], "-iB") == 0) {
-      inputB = argv[i + 1];
-    }
   }
 
   ifstream images(input);
-  ifstream imagesB(inputB);
   ofstream outfile;
   outfile.open(output);
   if (!images.is_open()) {
@@ -66,13 +57,10 @@ int gnss(int argc, char * argv[]) {
     (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
 
   ImageSize = rows * columns;
-  TableSize = NumImages / 4;
   Node * array = new Node[NumImages+1];
-  Node * arrayB = new Node[NumImages+1];
 
   for (int i = 0; i < NumImages; i++) {
     images.read(array[i].image.data(), ImageSize);
-    imagesB.read(arrayB[i].image.data(), 784);
   }
   random_device rd;
   mt19937 gen(rd());
@@ -87,7 +75,6 @@ int gnss(int argc, char * argv[]) {
     double totalExhaustiveDuration = 0.0;
     double maf=-1;
     ifstream query(queryF);
-    ifstream queryBigStream(queryB);
     if (!query.is_open()) {
       cerr << "Failed to open query.dat" << endl;
       return 1;
@@ -103,12 +90,9 @@ int gnss(int argc, char * argv[]) {
       queryImages = 10;
     }
     query.seekg(16);
-    queryBigStream.seekg(16);
     Node queries[queryImages];
-    Node queriesB[queryImages];
     for (int i = 0; i < queryImages; i++) {
       query.read(queries[i].image.data(), ImageSize);
-      queryBigStream.read(queriesB[i].image.data(), 784);
     }
     for (int i=0; i<queryImages; i++){
         array[NumImages]=queries[i];
@@ -136,11 +120,9 @@ int gnss(int argc, char * argv[]) {
         auto endMethod = chrono::high_resolution_clock::now();
         chrono::duration < double > durationMethod = endMethod - startMethod;  
         totalMethodDuration+= durationMethod.count();
-        ImageSize=784;
         auto startExhaustive = chrono::high_resolution_clock::now();
-         priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, queries[i], GraphN);
+         priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, queries[i]);
         auto endExhaustive = chrono::high_resolution_clock::now();
-        ImageSize=rows*columns;
         chrono::duration < double > durationExhaustive = endExhaustive - startExhaustive;
         totalExhaustiveDuration+=durationExhaustive.count();
         for (int j = GraphN - 1; j >= 0; j--) {
@@ -148,9 +130,10 @@ int gnss(int argc, char * argv[]) {
             distances.pop();
             methodResult[j] = nn_pqueue.top();
             nn_pqueue.pop();
-            if (j==0)
-            maf+=euclidean_distance(array[methodResult[j].pos],queries[i])/exhaustiveResult[j].distance;
-      } 
+            if ((methodResult[j].distance/exhaustiveResult[j].distance) > maf ){
+                maf=methodResult[j].distance/exhaustiveResult[j].distance;
+            }
+      }  
       outfile <<"Query" << i <<endl;
         for (int j = 0; j < GraphN; j++) {
         outfile << "Nearest neighbor-" << j + 1 << " " << methodResult[j].pos << endl;
@@ -161,7 +144,7 @@ int gnss(int argc, char * argv[]) {
     }
       outfile << "tAverageApproximate:" << (totalMethodDuration/queryImages) << endl;
       outfile << "tAverageTrue:" << (totalExhaustiveDuration/queryImages) << endl;
-      outfile <<"MAF"<< maf/queryImages << endl;
+      outfile <<"MAF"<< maf << endl;
     cout << "Repeat with different query?[y/n]" << endl;
     string answer;
     cin >> answer;

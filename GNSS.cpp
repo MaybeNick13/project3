@@ -40,7 +40,8 @@ int gnss(int argc, char * argv[]) {
     }
 
     ifstream images(input);
-      ofstream outfile;
+    ifstream imagesB(inputB);
+    ofstream outfile;
     ofstream testfile(test_file_str);
     outfile.open(output);
     if (!images.is_open()) {
@@ -114,8 +115,8 @@ int gnss(int argc, char * argv[]) {
         }
         query.seekg(16);
         queryBigStream.seekg(16);
-        Node queries[queryImages];
-        Node queriesB[queryImages];
+        Node * queries = new Node[queryImages];             // DELETE LATER
+        Node * queriesB = new Node[queryImages];            // DELETE LATER
         for (int i = 0; i < queryImages; i++) {
             query.read(queries[i].image.data(), ImageSize);
             queryBigStream.read(queriesB[i].image.data(), 784);

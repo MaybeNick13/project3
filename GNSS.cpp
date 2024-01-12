@@ -40,8 +40,7 @@ int gnss(int argc, char * argv[]) {
     }
 
     ifstream images(input);
-    ifstream imagesB(inputB);
-    ofstream outfile;
+      ofstream outfile;
     ofstream testfile(test_file_str);
     outfile.open(output);
     if (!images.is_open()) {

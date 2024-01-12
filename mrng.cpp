@@ -187,7 +187,7 @@ int mrng(int argc, char * argv[]){
     int l_mrng = 15; 
     char* input_name, *query_name, *output_name, *queryB_name, *inputB_name;
     int dimensions, num_of_images;
-    ifstream in_str, q_str,inB_str,qB,str;
+    ifstream in_str, q_str,inB_str,qB_str;
     ofstream out_str;
 
     input_name = get_str_of_option(argv, argv + argc, "-d");
@@ -335,7 +335,7 @@ int mrng(int argc, char * argv[]){
         for(int q = 0; q < num_of_queries; q++){
             ImageSize=784;
             auto exhaustiveSearchStart = chrono::high_resolution_clock::now();
-            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(arrayB, queriesB[q], N_mrng, num_of_images);
+            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(arrayB, queriesB[q], N_mrng);
             auto exhaustiveSearchEnd = chrono::high_resolution_clock::now();
             ImageSize=dimensions;
             chrono::duration <double> exhaustiveTime = exhaustiveSearchEnd - exhaustiveSearchStart;
@@ -357,8 +357,8 @@ int mrng(int argc, char * argv[]){
                 trueknn[N_mrng-j] = distances.top();
                 distances.pop();
                 float dist= euclidean_distance(queries[q],array[NNN[N_mrng-j]]);
-                if ((dist/trueknn[N_mrng-j].distance) > maf)
-                maf=dist/trueknn[N_mrng-j].distance;
+               // if ((dist/trueknn[N_mrng-j].distance) > maf)
+                //maf=dist/trueknn[N_mrng-j].distance;
 
             }
 
@@ -373,7 +373,7 @@ int mrng(int argc, char * argv[]){
         avg_exhaustive_time = avg_exhaustive_time / num_of_queries;
         out_str << "tAverageSearchOnGraph: " << avg_SearchOnGraph_time << endl;
         out_str << "tAverageTrue: " << avg_exhaustive_time << endl;
-        out_str << "MAF: " << maf <<endl;
+       // out_str << "MAF: " << maf <<endl;
         delete[] queries;
         cout << "Repeat with different query?[y/n]" << endl;
 

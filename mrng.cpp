@@ -258,6 +258,7 @@ int mrng(int argc, char * argv[]){
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
+    cout << "num of images latent" << num_of_images <<endl;
     num_of_images = 1000;
     int rows, columns;
     in_str.read(buffer,4);
@@ -276,7 +277,9 @@ int mrng(int argc, char * argv[]){
     ImageSize = dimensions;
     
     MRNG_Node * array = new MRNG_Node[num_of_images]; //DONT FORGET TO DELETE
+    ImageSize =784;
     Node* arrayB= new Node [num_of_images];
+    ImageSize=dimensions;
 	for (int i = 0; i < num_of_images - 1; i++) {
 		in_str.read((char*)(array[i].image.data()), dimensions);
         inB_str.read(arrayB[i].image.data(), 784);
@@ -357,8 +360,9 @@ int mrng(int argc, char * argv[]){
                 trueknn[N_mrng-j] = distances.top();
                 distances.pop();
                 float dist= euclidean_distance(queries[q],array[NNN[N_mrng-j]]);
-               // if ((dist/trueknn[N_mrng-j].distance) > maf)
-                //maf=dist/trueknn[N_mrng-j].distance;
+                if (j=1){
+                     maf+=euclidean_distance(arrayB[NNN[j-1]],queriesB[q])/trueknn[N_mrng-j].distance;
+                }
 
             }
 
@@ -373,7 +377,7 @@ int mrng(int argc, char * argv[]){
         avg_exhaustive_time = avg_exhaustive_time / num_of_queries;
         out_str << "tAverageSearchOnGraph: " << avg_SearchOnGraph_time << endl;
         out_str << "tAverageTrue: " << avg_exhaustive_time << endl;
-       // out_str << "MAF: " << maf <<endl;
+        out_str << "MAF: " << maf/num_of_queries <<endl;
         delete[] queries;
         cout << "Repeat with different query?[y/n]" << endl;
 

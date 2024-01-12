@@ -48,7 +48,7 @@ autoencoder.summary()
 history = autoencoder.fit(
     train_images, train_images,
     epochs=10,
-    batch_size=32,
+    batch_size=256,
     shuffle=True,
     validation_data=(valid_images, valid_images)
 )
@@ -62,9 +62,11 @@ encoded_test_imgs = encoder_model.predict(test_images)
 # Define file paths
 train_file_path = 'encoded_train_images.dat' 
 test_file_path = 'encoded_test_images.dat'
-
+all_encoded_imgs = np.concatenate([encoded_train_imgs, encoded_test_imgs])
+global_min = np.min(all_encoded_imgs)
+global_max = np.max(all_encoded_imgs)
 # Function to save encoded images to a file
-def save_encoded_images(file_path, encoded_imgs,latent_dimension=10):
+def save_encoded_images(file_path, encoded_imgs,global_min,global_max,latent_dimension=10):
     with open(file_path, 'wb') as file:
         # Write magic number (random 32-bit integer)
         magic_number = np.random.randint(0, 2**31 - 1)
@@ -73,17 +75,21 @@ def save_encoded_images(file_path, encoded_imgs,latent_dimension=10):
         print ("Number of Images",num_images)
         file.write(struct.pack('>I', num_images))
         file.write(struct.pack('>I', latent_dimension))
+        print ("Number of Images",latent_dimension)
         num_columns = 1 #unchangeable
         file.write(struct.pack('>I', num_columns))
+        global_min = np.min(encoded_imgs)
+        global_max = np.max(encoded_imgs)
 
         # Iterate through each image
         for img_idx in range(num_images):
             # Write pixel values (unsigned byte)
-            for pixel_value in encoded_imgs[img_idx].flatten():
-                file.write(struct.pack('B', max(0, min(int(pixel_value * 255), 255))))
+            normalized_values = ((encoded_imgs[img_idx] - global_min) / (global_max - global_min)) * 255
+            for pixel_value in normalized_values.flatten():
+                file.write(struct.pack('B', int(pixel_value)))
 
-save_encoded_images(train_file_path, encoded_train_imgs,latent_dim)
-save_encoded_images(test_file_path, encoded_test_imgs,latent_dim)
+save_encoded_images(train_file_path, encoded_train_imgs,global_min,global_max,latent_dim)
+save_encoded_images(test_file_path, encoded_test_imgs,global_min,global_max,latent_dim)
 
 print(f"Encoded training images saved to {train_file_path}")
 print(f"Encoded test images saved to {test_file_path}")

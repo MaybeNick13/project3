@@ -13,6 +13,6 @@
 
 using namespace std;
 
-vector<vector<pair_dist_pos>> create_graph(string input, int N);
+vector<vector<pair_dist_pos>> create_graph(Node* images, int N);
 
 #endif // LSH_H

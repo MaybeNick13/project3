@@ -28,41 +28,11 @@
 
 using namespace std;
 
-vector<vector<pair_dist_pos>> create_graph(string input, int N) {
+vector<vector<pair_dist_pos>> create_graph(Node* array, int N) {
     string output = "output.txt";
     ofstream outfile;
     outfile.open(output);
-    ifstream images(input);
-    if (!images.is_open()) {
-    cerr << "Failed to open input.dat" << endl;
-    }
-
-    images.seekg(4);
-    char buffer[4];
-    images.read(buffer, 4);
-    NumImages = (static_cast < uint32_t > (static_cast < unsigned char > (buffer[0])) << 24) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[1])) << 16) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[2])) << 8) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
-    int rows, columns;
-    images.read(buffer, 4);
-    rows = (static_cast < uint32_t > (static_cast < unsigned char > (buffer[0])) << 24) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[1])) << 16) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[2])) << 8) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
-    images.read(buffer, 4);
-    columns = (static_cast < uint32_t > (static_cast < unsigned char > (buffer[0])) << 24) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[1])) << 16) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[2])) << 8) |
-    (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
-
-    ImageSize = rows * columns;
-    TableSize = NumImages / 4;
     bool repeat;
-    Node * array = new Node[NumImages];
-    for (int i = 0; i < NumImages; i++) {
-        images.read(array[i].image.data(), ImageSize);
-    }
     repeat = false;
     hashtable* tables[L];
     for (int j = 0; j < L; j++) {
@@ -70,10 +40,6 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
     }
     vector<vector<pair_dist_pos>> graph (NumImages,vector<pair_dist_pos>(N));
     for (int i = 0; i < NumImages; i++) {
-        // if (i==41358){
-        //     cout <<"skipped 41358"<<endl;
-        //     continue;
-        // }
         auto startMethod = chrono::high_resolution_clock::now();
         pair_dist_pos furthest;
         set < int > same_ids; ///gia pithanoun gitones
@@ -126,7 +92,5 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
             }
         outfile << endl;
     }
-    delete[] array;
-    images.close();
     return graph;
     }

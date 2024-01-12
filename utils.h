@@ -65,6 +65,7 @@ public:
     std::vector<char> image;
     std::vector<unsigned int> IDS;
     Node();
+    Node(int size);
 };
 
 struct pair_dist_pos {

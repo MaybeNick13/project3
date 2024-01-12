@@ -91,6 +91,11 @@ Node::Node() {
     IDS = vector<unsigned int>(L, -1);
 }
 
+Node :: Node(int size){
+    image = vector<char>(size);
+    IDS = vector<unsigned int>(L, -1);
+}
+
 
 int findSmallestGreater(const vector<kmean_node>& vec, int n) {
     int left = 0;

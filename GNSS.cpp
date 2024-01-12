@@ -116,7 +116,9 @@ int gnss(int argc, char * argv[]) {
         query.seekg(16);
         queryBigStream.seekg(16);
         Node * queries = new Node[queryImages];             // DELETE LATER
+        ImageSize = 784;
         Node * queriesB = new Node[queryImages];            // DELETE LATER
+        ImageSize = rows * columns;
         for (int i = 0; i < queryImages; i++) {
             query.read(queries[i].image.data(), ImageSize);
             queryBigStream.read(queriesB[i].image.data(), 784);

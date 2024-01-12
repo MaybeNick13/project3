@@ -259,7 +259,8 @@ int mrng(int argc, char * argv[]){
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
     cout << "num of images latent" << num_of_images <<endl;
-    num_of_images = 10000;
+    num_of_images = 1000;
+    NumImages=num_of_images;
     int rows, columns;
     in_str.read(buffer,4);
     rows = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
@@ -275,7 +276,7 @@ int mrng(int argc, char * argv[]){
     dimensions = rows * columns;
 
     ImageSize = dimensions;
-    
+    inB_str.seekg(16);
     MRNG_Node * array = new MRNG_Node[num_of_images]; //DONT FORGET TO DELETE
     ImageSize = 784;
     MRNG_Node* arrayB= new MRNG_Node [num_of_images];
@@ -296,37 +297,10 @@ int mrng(int argc, char * argv[]){
     bool repeat = false;
 
     do{
-        double maf=0;
-        repeat = false;
-        q_str.seekg(4);
-        char q_buffer[4];
-        q_str.read(q_buffer,4);
-        int num_of_queries, q_dimen;
-        num_of_queries = (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[0]))<< 24) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[1])) << 16) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[2])) << 8) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[3])) );
-        cout << "Num of queries, " << num_of_queries  << endl;
-        int q_rows, q_columns;
-        q_str.read(q_buffer,4);
-        q_rows = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
-        q_str.read(buffer,4);
-        q_columns = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
-        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
         qB_str.seekg(16);
-        q_dimen = q_rows * q_columns;
-        cout << q_rows << endl;
-        cout << q_columns << endl;
-        if(q_dimen != dimensions){
-            cout << "Query dimensions not same as input data dimensions, program will now terminate, q_dimen = " << q_dimen << "and dimen =" << dimensions << endl;
-            exit(-3);
-        }
-
+        q_str.seekg(16);
+        int num_of_queries=10;
+        double maf=0;
         MRNG_Node * queries = new MRNG_Node[num_of_queries];
         ImageSize = 784;
         MRNG_Node * queriesB = new MRNG_Node [num_of_queries];
@@ -360,20 +334,22 @@ int mrng(int argc, char * argv[]){
             int i = 1;
 
             vector<pair_dist_pos> trueknn(N_mrng);
-
             for(int j = 1; j <= N_mrng; j++){
                 trueknn[N_mrng-j] = distances.top();
                 distances.pop();
-                float dist= euclidean_distance(queries[q],array[NNN[N_mrng-j]]);
-                if (j=1){
-                     maf+=euclidean_distance(arrayB[NNN[j-1]],queriesB[q])/trueknn[N_mrng-j].distance;
+                if (j==1){
+                    ImageSize=784;
+                     maf+=euclidean_distance(arrayB[NNN[N_mrng-j]],queriesB[q])/trueknn[N_mrng-j].distance;
+                     ImageSize=dimensions;
                 }
 
             }
 
             for(auto itr : NNN){
                 out_str << "Nearest Neigbor-" << i << ": " << itr << endl;
-                out_str << "distanceApproximate: " << euclidean_distance(array[itr], queries[q]) << endl;
+                ImageSize=784;
+                out_str << "distanceApproximate: " << euclidean_distance(arrayB[itr], queriesB[q]) << endl;
+                ImageSize=dimensions;
                 out_str << "distanceTrue: " << trueknn[i - 1].distance << endl;
                 i++;
             }

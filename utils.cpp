@@ -215,8 +215,8 @@ priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances
         } else {
             furthest = distances.top();
             if (pair.distance < furthest.distance) {
-            distances.pop();
-            distances.emplace(pair);
+                distances.pop();
+                distances.emplace(pair);
             }
         }
     }

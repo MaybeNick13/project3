@@ -183,8 +183,8 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
 
 
 int mrng(int argc, char * argv[]){
-    int N_mrng = 15;
-    int l_mrng = 15; 
+    int N_mrng = 5;
+    int l_mrng = 20; 
     char* input_name, *query_name, *output_name, *queryB_name, *inputB_name;
     int dimensions, num_of_images;
     ifstream in_str, q_str,inB_str,qB_str;
@@ -281,9 +281,14 @@ int mrng(int argc, char * argv[]){
     ImageSize = 784;
     MRNG_Node* arrayB= new MRNG_Node [num_of_images];
     ImageSize=dimensions;
+    ofstream testfile("mrng_input.txt");
 	for (int i = 0; i < num_of_images - 1; i++) {
 		in_str.read((char*)(array[i].image.data()), dimensions);
         inB_str.read((char*)(arrayB[i].image.data()), 784);
+        for(int j = 0; j < 784; j++){
+            testfile << setw(5) << +arrayB[i].image[j] << "\t";
+        }
+        testfile << endl;
 	}
     auto constructGraph = chrono::high_resolution_clock::now();
     search_graph_MRNG graph(l_mrng, N_mrng, dimensions, num_of_images, &array);

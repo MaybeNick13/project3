@@ -68,7 +68,7 @@ int gnss(int argc, char * argv[]) {
         (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
 
     ImageSize = rows * columns;
-    TableSize = NumImages / 4;
+    TableSize = NumImages / 6;
     testfile << NumImages << endl;
     testfile << rows << endl;
 

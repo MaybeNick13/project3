@@ -76,8 +76,10 @@ vector<vector<pair_dist_pos>> create_graph(Node* array, int N) {
                     f++;
                 }
             }
+            outfile << "\t";
         }
         else{
+            outfile << "exh:";
             nn_pqueue = calculateDistances(array, array[i], N);
         }
         auto endMethod = chrono::high_resolution_clock::now();

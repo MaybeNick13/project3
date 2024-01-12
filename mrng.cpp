@@ -259,7 +259,7 @@ int mrng(int argc, char * argv[]){
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
     cout << "num of images latent" << num_of_images <<endl;
-    num_of_images = 1000;
+    num_of_images = 10000;
     int rows, columns;
     in_str.read(buffer,4);
     rows = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
@@ -277,12 +277,12 @@ int mrng(int argc, char * argv[]){
     ImageSize = dimensions;
     
     MRNG_Node * array = new MRNG_Node[num_of_images]; //DONT FORGET TO DELETE
-    ImageSize =784;
-    Node* arrayB= new Node [num_of_images];
+    ImageSize = 784;
+    MRNG_Node* arrayB= new MRNG_Node [num_of_images];
     ImageSize=dimensions;
 	for (int i = 0; i < num_of_images - 1; i++) {
 		in_str.read((char*)(array[i].image.data()), dimensions);
-        inB_str.read(arrayB[i].image.data(), 784);
+        inB_str.read((char*)(arrayB[i].image.data()), 784);
 	}
     auto constructGraph = chrono::high_resolution_clock::now();
     search_graph_MRNG graph(l_mrng, N_mrng, dimensions, num_of_images, &array);
@@ -306,6 +306,7 @@ int mrng(int argc, char * argv[]){
         (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[1])) << 16) |
         (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[2])) << 8) |
         (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[3])) );
+        cout << "Num of queries, " << num_of_queries  << endl;
         int q_rows, q_columns;
         q_str.read(q_buffer,4);
         q_rows = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
@@ -319,16 +320,20 @@ int mrng(int argc, char * argv[]){
         (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
         qB_str.seekg(16);
         q_dimen = q_rows * q_columns;
+        cout << q_rows << endl;
+        cout << q_columns << endl;
         if(q_dimen != dimensions){
-            cout << "Query dimensions not same as input data dimensions, program will now terminate" << endl;
+            cout << "Query dimensions not same as input data dimensions, program will now terminate, q_dimen = " << q_dimen << "and dimen =" << dimensions << endl;
             exit(-3);
         }
 
         MRNG_Node * queries = new MRNG_Node[num_of_queries];
-        Node * queriesB=new Node [num_of_queries];
+        ImageSize = 784;
+        MRNG_Node * queriesB = new MRNG_Node [num_of_queries];
+        ImageSize = dimensions;
         for (int i = 0; i < num_of_queries - 1; i++) {
             q_str.read((char*)(queries[i].image.data()), dimensions);
-            qB_str.read(queriesB[i].image.data(), 784);
+            qB_str.read((char*)(queriesB[i].image.data()), 784);
 
         }
 

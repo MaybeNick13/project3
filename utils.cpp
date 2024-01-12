@@ -10,8 +10,8 @@
 using namespace std;
 
  int W = 6;
- int k = 8;
- int L = 10;
+ int k = 5;
+ int L = 20;
  int N = 50;
  int E=40;
  int R = 4;
@@ -199,6 +199,31 @@ priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances
 }
 
 priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(Node* array, Node query, int Num){
+    priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > distances;
+    pair_dist_pos furthest;
+    for (int j = 0; j < NumImages; j++) {
+        float dist = euclidean_distance(array[j], query);
+        if(dist == 0)
+            continue;
+        pair_dist_pos pair = {
+            dist,
+            j
+        }; //xrisimopoioume to struct myPair, afti ti fora dinontas sti thesi tou key tin apostasi, gia kaliteri xrisi xorou
+        if (j < Num) {
+            distances.push(pair);
+
+        } else {
+            furthest = distances.top();
+            if (pair.distance < furthest.distance) {
+            distances.pop();
+            distances.emplace(pair);
+            }
+        }
+    }
+    return distances;
+}
+
+priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(MRNG_Node* array, MRNG_Node query, int Num){
     priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > distances;
     pair_dist_pos furthest;
     for (int j = 0; j < NumImages; j++) {

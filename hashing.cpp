@@ -84,7 +84,7 @@ hashtable::hashtable(int num, Node** im) : images(im), id_num(num) {
         // returns projections of all vectors in a random line
         hval[i] = hashfuncs[i]->get_values();
         // random number to multiply the hvals
-        (*factors)[i] = (rand() % 9) + 1;
+        (*factors)[i] = (rand() % 1000) + 1;
     }
 
     for (int i = 0; i < NumImages; i++) {

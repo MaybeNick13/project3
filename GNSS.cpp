@@ -31,10 +31,10 @@ int gnss(int argc, char * argv[]) {
         if (strcmp(argv[i], "-R") == 0) {
         R = std::stoi(argv[i + 1]);
         }
-        if (strcmp(argv[i], "-qB") == 0) {
+        if (strcmp(argv[i], "-qb") == 0) {
         queryB = argv[i + 1];
         }
-        if (strcmp(argv[i], "-iB") == 0) {
+        if (strcmp(argv[i], "-ib") == 0) {
         inputB = argv[i + 1];
         }
     }
@@ -67,6 +67,8 @@ int gnss(int argc, char * argv[]) {
         (static_cast < uint32_t > (static_cast < unsigned char > (buffer[2])) << 8) |
         (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
 
+    imagesB.seekg(16);
+
     ImageSize = rows * columns;
     TableSize = NumImages / 6;
     testfile << NumImages << endl;
@@ -80,8 +82,8 @@ int gnss(int argc, char * argv[]) {
     for (int i = 0; i < NumImages; i++) {
         images.read(array[i].image.data(), ImageSize);
         imagesB.read(arrayB[i].image.data(), 784);
-        for(int j = 0; j < ImageSize; j++){
-            testfile << setw(3) << +array[i].image[j] << "\t";
+        for(int j = 0; j < 784; j++){
+            testfile << setw(5) << +arrayB[i].image[j] << "\t";
         }
         testfile << endl;
     }
@@ -151,7 +153,7 @@ int gnss(int argc, char * argv[]) {
             totalMethodDuration+= durationMethod.count();
             ImageSize=784;
             auto startExhaustive = chrono::high_resolution_clock::now();
-            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, queries[i], GraphN);
+            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(arrayB, queriesB[i], GraphN);
             auto endExhaustive = chrono::high_resolution_clock::now();
             ImageSize=rows*columns;
             chrono::duration < double > durationExhaustive = endExhaustive - startExhaustive;
@@ -161,15 +163,20 @@ int gnss(int argc, char * argv[]) {
                 distances.pop();
                 methodResult[j] = nn_pqueue.top();
                 nn_pqueue.pop();
-                if (j==0)
-                maf+=euclidean_distance(array[methodResult[j].pos],queries[i])/exhaustiveResult[j].distance;
-        } 
-        outfile <<"Query" << i <<endl;
+                if (j==0){
+                    ImageSize = 784;
+                    maf+=euclidean_distance(arrayB[methodResult[j].pos],queriesB[i])/exhaustiveResult[j].distance;
+                    ImageSize = rows * columns;
+                }
+            } 
+            outfile <<"Query" << i <<endl;
             for (int j = 0; j < GraphN; j++) {
-            outfile << "Nearest neighbor-" << j + 1 << " " << methodResult[j].pos << endl;
-            outfile << "distanceApproximate:" << methodResult[j].distance << endl;
-            outfile << "distanceTrue:" << exhaustiveResult[j].distance << endl;
-        }
+                outfile << "Nearest neighbor-" << j + 1 << " " << methodResult[j].pos << endl;
+                ImageSize = 784;
+                outfile << "distanceApproximate:" << euclidean_distance(arrayB[methodResult[j].pos], queriesB[i])<< endl;
+                ImageSize = rows * columns;
+                outfile << "distanceTrue:" << exhaustiveResult[j].distance << endl;
+            }
 
         }
         outfile << "tAverageApproximate:" << (totalMethodDuration/queryImages) << endl;

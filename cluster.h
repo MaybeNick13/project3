@@ -12,8 +12,6 @@
 #include <queue>
 #include <chrono>
 #include "utils.h"
-#include "hashing.h"
-#include "hypercube.h"
 #include <algorithm>
 #include <cstring>
 #include <iomanip>
@@ -43,13 +41,9 @@ class cluster{
 
 	void assign_lloyds();
 
-	void assign_lsh_range();
+	vector<float> compute_silhouette(Node* pts);
 
-	void assign_hypercube_range();
-
-	vector<float> compute_silhouette();
-
-	float avg_dist_clust_pts(int clust_num, int point_num);
+	float avg_dist_clust_pts(int clust_num, int point_num, Node *pts);
 
 	void update_2_centers(int in, int out);
 

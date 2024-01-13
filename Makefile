@@ -11,6 +11,9 @@ $(TARGET): $(OBJS) hashing.h utils.h
 lsh: lsh.o utils.o hashing.o hashing.h utils.h
 	$(CXX) $(CXXFLAGS) lsh.o utils.o hashing.o -o lsh
 
+cluster: clustering.o cluster.o utils.o utils.h cluster.h
+	$(CXX) $(CXXFLAGS) clustering.o cluster.o utils.o -o cluster
+
 %.o: %.cpp 
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 

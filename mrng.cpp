@@ -183,6 +183,7 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
 
 
 int mrng(int argc, char * argv[]){
+    bool repeated= false;
     int N_mrng = 5;
     int l_mrng = 20; 
     char* input_name, *query_name, *output_name, *queryB_name, *inputB_name;
@@ -365,20 +366,26 @@ int mrng(int argc, char * argv[]){
         out_str << "tAverageTrue: " << avg_exhaustive_time << endl;
         out_str << "MAF: " << maf/num_of_queries <<endl;
         delete[] queries;
+        delete[] queriesB;
         cout << "Repeat with different query?[y/n]" << endl;
 
         string answer;
         cin >> answer;
+        if (repeated == true){
+            delete[] query_name;
+        }
         if (answer.compare("y") == 0) {
             cout << "Enter query file name" << endl;
             cin >> answer;
             repeat = true;
+            repeated = true;
             query_name=new char[answer.length()+1];
             strcpy(query_name,answer.c_str());
             q_str=ifstream(query_name);
     }
     }while (repeat == 1);
     delete[] array;
+    delete[] arrayB;
     return 0;
 }
 

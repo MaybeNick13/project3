@@ -38,7 +38,8 @@ int gnss(int argc, char * argv[]) {
         inputB = argv[i + 1];
         }
     }
-
+    cout << "Hyperparameters" <<endl;
+    cout <<"k = " << N << " E = " << E <<" R = " << R <<endl;
     ifstream images(input);
     ifstream imagesB(inputB);
     ofstream outfile;
@@ -98,7 +99,7 @@ int gnss(int argc, char * argv[]) {
         repeat = false;
         double totalMethodDuration = 0.0;
         double totalExhaustiveDuration = 0.0;
-        double maf=-1;
+        double maf=0;
         ifstream query(queryF);
         ifstream queryBigStream(queryB);
         if (!query.is_open()) {
@@ -182,6 +183,8 @@ int gnss(int argc, char * argv[]) {
         outfile << "tAverageApproximate:" << (totalMethodDuration/queryImages) << endl;
         outfile << "tAverageTrue:" << (totalExhaustiveDuration/queryImages) << endl;
         outfile <<"MAF"<< maf/queryImages << endl;
+        delete[] queries;
+        delete[] queriesB;
         cout << "Repeat with different query?[y/n]" << endl;
         string answer;
         cin >> answer;
@@ -193,6 +196,7 @@ int gnss(int argc, char * argv[]) {
         }
     }while (repeat == 1);
     delete[] array;
+    delete[] arrayB;
     images.close();
     delete[] methodResult;
     delete[] exhaustiveResult;

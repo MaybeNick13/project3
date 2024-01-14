@@ -365,6 +365,7 @@ int mrng(int argc, char * argv[]){
         out_str << "tAverageTrue: " << avg_exhaustive_time << endl;
         out_str << "MAF: " << maf/num_of_queries <<endl;
         delete[] queries;
+        delete[] queriesB;
         cout << "Repeat with different query?[y/n]" << endl;
 
         string answer;
@@ -379,6 +380,7 @@ int mrng(int argc, char * argv[]){
     }
     }while (repeat == 1);
     delete[] array;
+    delete[] arrayB;
     return 0;
 }
 

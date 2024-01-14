@@ -149,6 +149,8 @@ vector<float> cluster::compute_silhouette(Node* pts){        //upologismos silho
         float min_dist = euclidean_distance(pts[p], centroids[closest_centroid]);
 
         for(int c = 0; c < num_of_centroids; c++){
+            if( c == group_num[p])
+                continue;
             float dist;
             dist = euclidean_distance(pts[p], centroids[c]);
             if(dist < min_dist){

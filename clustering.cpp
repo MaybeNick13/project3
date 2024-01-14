@@ -169,7 +169,7 @@ int main(int argc, char * argv[]) {
 		out_stream << "size: " << cl.sizeof_group(c)<< endl;
 		out_stream << "Cluster coords:" << endl;
 		vector<float> coordinates = cl.get_centroid(c);
-		for(int i = 0; i < 10; i++){
+		for(int i = 0; i < rows * columns; i++){
 			out_stream << setw(6) << setprecision(1)<< coordinates[i] << "\t";
 		}
         out_stream << endl;

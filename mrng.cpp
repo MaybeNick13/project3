@@ -183,6 +183,7 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
 
 
 int mrng(int argc, char * argv[]){
+    bool repeated= false;
     int N_mrng = 5;
     int l_mrng = 20; 
     char* input_name, *query_name, *output_name, *queryB_name, *inputB_name;
@@ -370,10 +371,14 @@ int mrng(int argc, char * argv[]){
 
         string answer;
         cin >> answer;
+        if (repeated == true){
+            delete[] query_name;
+        }
         if (answer.compare("y") == 0) {
             cout << "Enter query file name" << endl;
             cin >> answer;
             repeat = true;
+            repeated = true;
             query_name=new char[answer.length()+1];
             strcpy(query_name,answer.c_str());
             q_str=ifstream(query_name);

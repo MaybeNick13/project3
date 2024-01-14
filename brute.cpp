@@ -146,6 +146,8 @@ int main(int argc, char * argv[]){
         outfile << "tAverageApproximate:" << (totalMethodDuration/queryImages) << endl;
         outfile << "tAverageTrue:" << (totalExhaustiveDuration/queryImages) << endl;
         outfile <<"MAF"<< maf/queryImages << endl;
+        delete[] queries;
+        delete[] queriesB;
         cout << "Repeat with different query?[y/n]" << endl;
         string answer;
         cin >> answer;
@@ -157,6 +159,7 @@ int main(int argc, char * argv[]){
         }
     }while (repeat == 1);
     delete[] array;
+    delete[] arrayB;
     images.close();
     imagesB.close();
     delete[] methodResult;

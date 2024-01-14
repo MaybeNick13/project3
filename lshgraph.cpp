@@ -94,5 +94,8 @@ vector<vector<pair_dist_pos>> create_graph(Node* array, int N) {
             }
         outfile << endl;
     }
+    for (int j = 0; j < L; j++) {
+        delete tables[j];
+    }    
     return graph;
     }

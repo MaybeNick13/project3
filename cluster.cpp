@@ -134,243 +134,11 @@ void cluster::assign_lloyds(){		//Mqueens
     }while(!check_conv(old));        //mexri na kanei converge
 }
 
-void cluster::assign_lsh_range(){
-
-    vector<vector<float>> old;
-    hashtable tables[L];        
-    for (int j = 0; j < L; j++){
-        tables[j] = hashtable(j, points);	//ftiaxnw lsh
-    }
-    int i = 0;
-    do{
-        old = centroids;	
-
-        vector<vector<bool>> possible_groups (num_of_points, vector<bool>(num_of_centroids + 1, false));    //pi9ana groups, h 1h timh xrhsimopoietai gia na dhlwsei an to shmeio exei hdh mpei se kapoio group
-        // opote den to tsekaroume kan
-        vector<vector<float>> dist_from_centr(num_of_points, vector<float>(num_of_centroids));    //krataei tis apostaseis enos shmeiou apo ena kentro
-        vector<vector<int>> IDS_of_ctr (num_of_centroids, vector<int> (L));                        //domh pou xreiazetai gia na apo9hkeuei ta id ton kentrwn pou epistrefei h lsh
-
-        // finding smallest distance between 2 centroids
-
-        float radius = 10000000.0;
-        float dist;
-        list < int > candidates;
-
-        for(int c = 0; c < num_of_centroids; c++){
-            for(int c2 = c + 1; c2 < num_of_centroids; c2++){
-                dist = euclidean_distance(centroids[c], centroids[c2]);        //briskw thn mikroterh apostash anamesa se 2 kentra
-                if(dist < radius){
-                    radius = dist;
-                }
-            }
-        }
-
-        float max_R = radius * 8;                    //max radius checking = radius * 8 (kai polu einai, isws eprepe na to mikrino kai ligo)
-        radius = radius / 2;                        // h arxikh aktina einai ish me to miso ths mikroterhs (wste na mhn exoume kai overlaps thn 1h fora)
-        while(radius < max_R){
-            //upologismos Range search gia ka9e kentro
-            for(int c = 0; c < num_of_centroids; c++){
-                for (int j = 0; j < L; j++) {
-                    tables[j].hash(centroids[c], &IDS_of_ctr[c]);
-
-                    int bucket_num = IDS_of_ctr[c][j] % (NumImages / 4);
-                    candidates = tables[j].get_bucket(bucket_num); //getting images in the same bucket
-
-                    for (auto itr: candidates) {
-                        if(possible_groups[itr][0] == false){
-                            dist_from_centr[itr][c] = euclidean_distance((*points)[itr], centroids[c]);
-                            if (euclidean_distance((*points)[itr], centroids[c]) < radius) { //finding neighbors with same id
-                                possible_groups[itr][c + 1] = true;
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            //gia ka9e stoixeio
-            for(int p = 0; p < num_of_points; p++){
-                float min_dist = 1000000.0;
-                int centr_pos = -1;
-                if(possible_groups[p][0] == false){        //check an exei mpei hdh se kapoio kentro se auto to loop
-                    for(int c = 0; c < num_of_centroids; c++){
-                        if(possible_groups[p][c + 1] == true && dist_from_centr[p][c] < min_dist){        //an brhkame oti se auto to loop mphke se kapoio kentro,
-                            possible_groups[p][0] = true;                                                    //tote kanoume flag gia na mhn 3anaelegx9ei sta epomena loop
-                            min_dist = dist_from_centr[p][c];                                                //kai to bazoume sto kontinotero apo auta (an uparxoun polla)
-                            centr_pos = c;
-                        }
-                    }
-                }
-                if(centr_pos > 0){
-                    if(centr_pos != group_num[p]){                                                    //an brhkame oti einai se ena kentro to opoio den einai hdh auto sto opoio einai mesa, to kanoume remove
-                        remove_from_group(group_num[p], p);                                            // apo to prohgoumeno tou kai insert sto neo
-                        insert_to_grp(centr_pos, p);
-                    }
-                }
-                
-            }
-            update_centers();                                                                        //update ta kentra
-            radius = radius * 2;
-        }
-    
-        
-        for(int p = 0; p < num_of_points; p++){                                                    //telos afou teleiwsoume gia oles tis aktines, ta shmeia pou den exoun mpei hdh se kapoio 
-            float min_dist = 1000000.0, dist;                                                        //cluster, ta bazoume manually se auto me to kontinotero kentro
-            int centr_pos;
-
-            if(possible_groups[p][0] == false){
-                for(int c = 0; c < num_of_centroids; c++){
-                    dist = euclidean_distance((*points)[p], centroids[c]);
-                    if(dist< min_dist){
-                        centr_pos = c;
-                    }
-                }
-            }
-            if(centr_pos > 0){
-                if(centr_pos != group_num[p]){
-                    remove_from_group(group_num[p], p);
-                    insert_to_grp(group_num[p], p);
-                }
-            }
-            
-        }
-        update_centers(); 
-        cout << "i:\t" << i << endl;
-    }while(!check_conv(old));        //mexri na kanoun converge
-}
-
-void cluster::assign_hypercube_range(){        //o algorithmos einai idios me ton lsh, aplws to reverse range ginetai me to hypercube anti gia ton lsh
-    hyperCube cube=hyperCube ((*points));
-    vector <int> hval;
-    biMap biFunc;
-    hashfunc h[ck];
-    for (int i=0; i<ck; i++){
-        h[i]=hashfunc((*points));
-        hval=h[i].get_values();
-        for (int j=0; j<NumImages;j++){
-            (*points)[j].IDS[i]=biFunc.mapper(hval[j]); 
-    }
-    }
-    vector<vector<float>> old;
-    int i = 0;
-
-    do{
-        old = centroids;
-        vector<vector<bool>> possible_groups (num_of_points, vector<bool>(num_of_centroids + 1, false));
-        vector<vector<float>> dist_from_centr(num_of_points, vector<float>(num_of_centroids));
-        vector<vector<int>> IDS_of_ctr (num_of_centroids, vector<int> (L));
-
-        // finding smallest distance between 2 centroids
-
-        float starting_radius = 10000000.0;
-        float dist;
-        list < int > candidates;
-
-        for(int c = 0; c < num_of_centroids; c++){
-            for(int c2 = c + 1; c2 < num_of_centroids; c2++){
-                dist = euclidean_distance(centroids[c], centroids[c2]);
-                if(dist < starting_radius){
-                    starting_radius = dist;
-                }
-            }
-        }
-
-        float max_R = starting_radius * 4;
-        starting_radius = starting_radius / 2;
-        while(starting_radius < max_R){
-            for(int c = 0; c < num_of_centroids; c++){
-
-                vector <int> queryIDS(ck);
-                for (int j=0;j<ck;j++){
-                    queryIDS[j]=biFunc.mapper(h[j].hash(centroids[c]));
-                }
-                string sedge=to_string(queryIDS[0]);
-                for (int j=1; j < ck ; j++){
-                    sedge= (sedge) + to_string(queryIDS[j]);
-                }
-                vector <string> edges;
-                edges.push_back(sedge);
-                for (int j=1; j <cProbes;j++){
-                    string edgeBuff=sedge;
-                    if (edgeBuff[j-1]== '0'){
-                        edgeBuff[j-1]='1';
-                    }
-                    else {
-                        edgeBuff[j-1]='0';
-                    }
-                    edges.push_back(edgeBuff);
-                }
-                for (int j=0; j<cProbes;j++){
-                for (int v=0; v<NumImages; v++){
-                    if (edges[j].compare(cube.edges[v])== 0 && possible_groups[v][0]){
-
-                            float dist = euclidean_distance((*points)[v],centroids[c]);
-                            pair_dist_pos current {dist,v};
-                            if (dist< starting_radius) {
-                                possible_groups[v][c + 1] = true;
-                                dist_from_centr[v][c] = dist;
-                            }
-                }
-                }
-            }
-            }
-
-            for(int p = 0; p < num_of_points; p++){
-                float min_dist = 1000000.0;
-                int centr_pos = -1;
-                if(possible_groups[p][0] == false){
-                    for(int c = 0; c < num_of_centroids; c++){
-                        if(possible_groups[p][c + 1] == true && dist_from_centr[p][c] < min_dist){
-                            possible_groups[p][0] = true;
-                            min_dist = dist_from_centr[p][c];
-                            centr_pos = c;
-                        }
-                    }
-                }
-                if(centr_pos > 0){
-                    if(centr_pos != group_num[p]){
-                        remove_from_group(group_num[p], p);
-                        insert_to_grp(centr_pos, p);
-                    }
-                }
-                
-            }
-            update_centers();
-            starting_radius = starting_radius * 2;
-        }
-        
-        for(int p = 0; p < num_of_points; p++){
-            float min_dist = 1000000.0, dist;
-            int centr_pos;
-
-            if(possible_groups[p][0] == false){
-                for(int c = 0; c < num_of_centroids; c++){
-                    dist = euclidean_distance((*points)[p], centroids[c]);
-                    if(dist< min_dist){
-                        min_dist = dist;
-                        centr_pos = c;
-                    }
-                }
-            }
-            if(centr_pos > 0){
-                if(centr_pos != group_num[p]){
-                    remove_from_group(group_num[p], p);
-                    insert_to_grp(centr_pos, p);
-                }
-            }
-            
-        }
-
-        update_centers(); 
-        cout << "i:" << i++ << endl;
-    }while(!check_conv(old));
-}
-
-vector<float> cluster::compute_silhouette(){        //upologismos silhouette gia ka9e shmeio 
+vector<float> cluster::compute_silhouette(Node* pts){        //upologismos silhouette gia ka9e shmeio 
     vector<float> sil(num_of_points, 2.0);
 
     for(int p = 0; p < num_of_points; p++){
-        float ap = avg_dist_clust_pts(group_num[p], p);
+        float ap = avg_dist_clust_pts(group_num[p], p, pts);
         int closest_centroid;
 
         if(group_num[p] != 0)
@@ -378,18 +146,18 @@ vector<float> cluster::compute_silhouette(){        //upologismos silhouette gia
         else
             closest_centroid = 1;
 
-        float min_dist = sqr_euclidean_distance_points((*points)[p].image, centroids[closest_centroid]);
+        float min_dist = euclidean_distance(pts[p], centroids[closest_centroid]);
 
         for(int c = 0; c < num_of_centroids; c++){
             float dist;
-            dist = sqr_euclidean_distance_points((*points)[p].image, centroids[c]);
+            dist = euclidean_distance(pts[p], centroids[c]);
             if(dist < min_dist){
                 closest_centroid = c;
                 min_dist = dist;
             }
         }
 
-        float bp = avg_dist_clust_pts(closest_centroid, p);
+        float bp = avg_dist_clust_pts(closest_centroid, p, pts);
 
         if(bp > ap){
             sil[p] = 1 - ap/bp;
@@ -400,16 +168,15 @@ vector<float> cluster::compute_silhouette(){        //upologismos silhouette gia
             sil[p] = 0;
         }
     }
-
     return sil;
 }
 
-float cluster::avg_dist_clust_pts(int clust_num, int point_num){    //mesos oros apostashs shmeiou apo ta upoloipa sto cluster tou
+float cluster::avg_dist_clust_pts(int clust_num, int point_num, Node *pts){    //mesos oros apostashs shmeiou apo ta upoloipa sto cluster tou
     float avg_dist = 0;
     int i = 0;
     for(auto p : groups[clust_num]){
         if(p != point_num){
-            avg_dist += euclidean_distance((*points)[p], (*points)[point_num]);
+            avg_dist += euclidean_distance(pts[p], pts[point_num]);
             i++;
         }
     }

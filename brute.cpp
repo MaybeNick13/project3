@@ -5,39 +5,40 @@
 #include <random>
 #include <cstring>
 #include <chrono>
+
+
+
 int main(int argc, char * argv[]){
     srand((unsigned)time(NULL));
     string input = "encoded_train_images.dat";
     string queryF = "encoded_test_images.dat";
-    string output = "graphRes.txt";
+    string output = "results_brute.txt";
     string inputB="input.dat";
     string queryB="query.dat";
-    string test_file_str = "test_file.txt";
     for (int i = 1; i < argc; i++) { //parsing gia ta input variables
         if (strcmp(argv[i], "-o") == 0) {
-        output = argv[i + 1];
+            output = argv[i + 1];
         }
         if (strcmp(argv[i], "-d") == 0) {
-        input = argv[i + 1];
+            input = argv[i + 1];
         }
         if (strcmp(argv[i], "-q") == 0) {
-        queryF = argv[i + 1];
+            queryF = argv[i + 1];
         }
         if (strcmp(argv[i], "-N") == 0) {
-        GraphN = std::stoi(argv[i + 1]);
+            GraphN = std::stoi(argv[i + 1]);
         }
         if (strcmp(argv[i], "-qB") == 0) {
-        queryB = argv[i + 1];
+            queryB = argv[i + 1];
         }
         if (strcmp(argv[i], "-iB") == 0) {
-        inputB = argv[i + 1];
+            inputB = argv[i + 1];
         }
     }
 
     ifstream images(input);
     ifstream imagesB(inputB);
     ofstream outfile;
-    ofstream testfile(test_file_str);
     outfile.open(output);
     if (!images.is_open()) {
         cerr << "Failed to open input file" << endl;
@@ -64,20 +65,17 @@ int main(int argc, char * argv[]){
 
     ImageSize = rows * columns;
     TableSize = NumImages / 6;
-    testfile << NumImages << endl;
-    testfile << rows << endl;
 
     Node * array = new Node[NumImages+1];
     ImageSize = 784;
     Node * arrayB = new Node[NumImages+1];
     ImageSize = rows * columns;
+
+    imagesB.seekg(16);
+
      for (int i = 0; i < NumImages; i++) {
         images.read(array[i].image.data(), ImageSize);
         imagesB.read(arrayB[i].image.data(), 784);
-        for(int j = 0; j < ImageSize; j++){
-            testfile << setw(3) << +array[i].image[j] << "\t";
-        }
-        testfile << endl;
     }
     pair_dist_pos * methodResult = new pair_dist_pos[GraphN];
     pair_dist_pos * exhaustiveResult  = new pair_dist_pos[GraphN];
@@ -90,8 +88,8 @@ int main(int argc, char * argv[]){
         ifstream query(queryF);
         ifstream queryBigStream(queryB);
         if (!query.is_open()) {
-        cerr << "Failed to open query.dat" << endl;
-        return 1;
+            cerr << "Failed to open query.dat" << endl;
+            return 1;
         }
         query.seekg(4);
         int queryImages;
@@ -101,7 +99,7 @@ int main(int argc, char * argv[]){
         (static_cast < uint32_t > (static_cast < unsigned char > (buffer[2])) << 8) |
         (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
         if (queryImages > 10) {
-        queryImages = 10;
+            queryImages = 10;
         }
         query.seekg(16);
         queryBigStream.seekg(16);
@@ -114,32 +112,36 @@ int main(int argc, char * argv[]){
             queryBigStream.read(queriesB[i].image.data(), 784);
         }
         for (int i=0; i < queryImages; i++){
-        ImageSize=784;
-        auto startExhaustive = chrono::high_resolution_clock::now();
-        priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(arrayB, queriesB[i], GraphN);
-        auto endExhaustive = chrono::high_resolution_clock::now();
-        ImageSize=rows*columns;
-        chrono::duration < double > durationExhaustive = endExhaustive - startExhaustive;
-        totalExhaustiveDuration+=durationExhaustive.count();
-        auto startMethod =  chrono::high_resolution_clock::now();
-        priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distancesSmall = calculateDistances(array, queries[i], GraphN);
-        auto endMethod = chrono::high_resolution_clock::now();
-        chrono::duration < double > durationMethod = endExhaustive - startExhaustive;
-        totalMethodDuration+=durationMethod.count();
-        for (int j = GraphN - 1; j >= 0; j--) {
+            ImageSize = 784;
+            auto startExhaustive = chrono::high_resolution_clock::now();
+            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(arrayB, queriesB[i], GraphN);
+            auto endExhaustive = chrono::high_resolution_clock::now();
+            ImageSize=rows*columns;
+            chrono::duration < double > durationExhaustive = endExhaustive - startExhaustive;
+            totalExhaustiveDuration += durationExhaustive.count();
+
+            
+            auto startMethod =  chrono::high_resolution_clock::now();
+            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distancesSmall = calculateDistances(array, queries[i], GraphN);
+            auto endMethod = chrono::high_resolution_clock::now();
+            chrono::duration < double > durationMethod = endMethod - startMethod;
+            totalMethodDuration += durationMethod.count();
+            ImageSize = 784;
+            for (int j = GraphN - 1; j >= 0; j--) {
                 exhaustiveResult[j] = distances.top();
                 distances.pop();
                 methodResult[j] = distancesSmall.top();
                 distancesSmall.pop();
                 if (j==0)
-                maf+=euclidean_distance(array[methodResult[j].pos],queries[i])/exhaustiveResult[j].distance;
-        } 
-        outfile <<"Query" << i <<endl;
+                    maf += euclidean_distance(arrayB[methodResult[j].pos],queriesB[i])/exhaustiveResult[j].distance;
+                } 
+                outfile <<"Query" << i <<endl;
             for (int j = 0; j < GraphN; j++) {
-            outfile << "Nearest neighbor-" << j + 1 << " " << methodResult[j].pos << endl;
-            outfile << "distanceApproximate:" << methodResult[j].distance << endl;
-            outfile << "distanceTrue:" << exhaustiveResult[j].distance << endl;
-        }
+                outfile << "Nearest neighbor-" << j + 1 << " " << methodResult[j].pos << endl;
+                outfile << "distanceApproximate:" << euclidean_distance(arrayB[methodResult[j].pos], queriesB[i]) << endl;
+                outfile << "distanceTrue:" << exhaustiveResult[j].distance << endl;
+            }
+            ImageSize = rows * columns;
         }
         outfile << "tAverageApproximate:" << (totalMethodDuration/queryImages) << endl;
         outfile << "tAverageTrue:" << (totalExhaustiveDuration/queryImages) << endl;
